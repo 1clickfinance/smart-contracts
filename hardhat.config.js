@@ -1,5 +1,6 @@
 require('dotenv').config();
 require("@nomiclabs/hardhat-waffle");
+require("hardhat-gas-reporter");
 
 module.exports = {
   defaultNetwork: "hardhat",
@@ -24,6 +25,11 @@ module.exports = {
       url: `https://speedy-nodes-nyc.moralis.io/${process.env.MORALIS_API_KEY}/avalanche/mainnet`,
       accounts: [process.env.DEPLOYER_PRIVATE_KEY]
     }
+  },
+  gasReporter: {
+    gasPrice: 21,
+    coinmarketcap: process.env.CMC_API_KEY,
+    currency: 'USD'
   },
   solidity: {
     version: "0.8.4",

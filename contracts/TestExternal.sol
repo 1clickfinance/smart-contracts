@@ -15,6 +15,5 @@ contract TestExternal {
     function updateValues(string calldata _message, uint256 _value) public payable {
         message = _message;
         value = _value;
-        // console.log("callMe %s %d, Paid: %d", message, value, msg.value);
     }
 }

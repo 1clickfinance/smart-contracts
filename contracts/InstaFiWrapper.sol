@@ -2,8 +2,10 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/utils/Strings.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
+import "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
 
-contract InstaFiWrapper {
+contract InstaFiWrapper is IERC721Receiver, IERC1155Receiver {
 
     struct CallUnit {
         address contractAddress;
@@ -11,15 +13,17 @@ contract InstaFiWrapper {
         bytes functionArguments;
         uint256 value;
     }
+    mapping(bytes4 => bool) internal callsToVerify;
 
-    // Magic numbers derived from the method signature of the token standards
-    bytes4 public constant ERC20_TRANSFER_FROM_FUNCTION_ID = 0x23b872dd;
-    bytes4 public constant ERC721_SAFE_TRANSFER_FROM_ID = 0x42842e0e;
-    bytes4 public constant ERC721_SAFE_TRANSFER_FROM_DATA_ID = 0xb88d4fde;
-    bytes4 public constant ERC1155_SAFE_TRANSFER_FROM_ID = 0xf242432a;
-    bytes4 public constant ERC1155_SAFE_BATCH_TRANSFER_FROM_ID = 0x2eb2c2d6;
-
-    constructor() { }
+    constructor() {
+        // Cannot use selector on overloaded functions - see https://github.com/ethereum/solidity/issues/1256
+        // So, using good old signatures through out
+        callsToVerify[bytes4(keccak256("transferFrom(address,address,uint256)"))] = true;                               // ERC20, ERC721
+        callsToVerify[bytes4(keccak256("safeTransferFrom(address,address,uint256)"))] = true;                           // ERC721
+        callsToVerify[bytes4(keccak256("safeTransferFrom(address,address,uint256,bytes)"))] = true;                     // ERC721
+        callsToVerify[bytes4(keccak256("safeTransferFrom(address,address,uint256,uint256,bytes)"))] = true;             // ERC1155
+        callsToVerify[bytes4(keccak256("safeBatchTransferFrom(address,address,uint256[],uint256[],bytes)"))] = true;    // ERC1155
+    }
 
     /**
      * Call the given contracts with the given callData
@@ -43,15 +47,46 @@ contract InstaFiWrapper {
             );
         }
     }
+    
+    // These are just so we can receive tokens through safeTransfers
+    function onERC721Received(
+        address operator,
+        address from,
+        uint256 tokenId,
+        bytes calldata data
+    ) override external returns (bytes4) {
+        emit ERC721Received(operator, from, tokenId, data);
+        return IERC721Receiver.onERC721Received.selector;
+    }
+    
+    function onERC1155Received(
+        address operator,
+        address from,
+        uint256 id,
+        uint256 value,
+        bytes calldata data
+    ) override external returns (bytes4) {
+        emit ERC1155Received(operator, from, id, value, data);
+        return IERC1155Receiver.onERC1155Received.selector;
+    }
+
+    function onERC1155BatchReceived(
+        address operator,
+        address from,
+        uint256[] calldata ids,
+        uint256[] calldata values,
+        bytes calldata data
+    ) override external returns (bytes4) {
+        emit ERC1155BatchReceived(operator, from, ids, values, data);
+        return IERC1155Receiver.onERC1155BatchReceived.selector;
+    }
+
+    function supportsInterface(bytes4 interfaceId) override external pure returns (bool) {
+        return IERC165.supportsInterface.selector == interfaceId;
+    }
 
     function verifyIfCallPermitted(bytes4 functionSelector, bytes memory functionArguments) private view {
-        if (
-            functionSelector == ERC20_TRANSFER_FROM_FUNCTION_ID || 
-            functionSelector == ERC721_SAFE_TRANSFER_FROM_ID || 
-            functionSelector == ERC721_SAFE_TRANSFER_FROM_DATA_ID ||
-            functionSelector == ERC1155_SAFE_TRANSFER_FROM_ID || 
-            functionSelector == ERC1155_SAFE_BATCH_TRANSFER_FROM_ID
-        ) {
+        if (callsToVerify[functionSelector]) {
             address fromAddress = _extractFromAddress(functionArguments);
             require(
                 fromAddress == msg.sender || fromAddress == address(this), 
@@ -75,6 +110,31 @@ contract InstaFiWrapper {
         return returnValue;
     }
 
-    event CallExecuted(address indexed contractAddress, bytes4 indexed functionSelector, bytes functionArguments, uint256 value);
+    event CallExecuted(
+        address indexed contractAddress, 
+        bytes4 indexed functionSelector, 
+        bytes functionArguments, 
+        uint256 value
+    );
+    event ERC721Received(
+        address operator,
+        address from,
+        uint256 tokenId,
+        bytes data
+    );
+    event ERC1155Received(
+        address indexed operator, 
+        address indexed from, 
+        uint256 id, 
+        uint256 value, 
+        bytes data
+    );
+    event ERC1155BatchReceived(
+        address indexed operator, 
+        address indexed from, 
+        uint256[] ids, 
+        uint256[] values, 
+        bytes data
+    );
 
 }

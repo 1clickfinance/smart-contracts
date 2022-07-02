@@ -130,5 +130,25 @@ describe("ERC 721 execution", () => {
 
         expect(await instaFiContract.executeExternal(callUnits, { value: 0}));
     });
+
+    it("Contract --> Owner: safeTransferFrom works", async () => {
+        const toContractTransferCall = makeCallUnit(
+            erc721Contract.address, 
+            "safeTransferFrom", 
+            ['address', 'address', 'uint256'], 
+            [await owner.getAddress(), instaFiContract.address, 1],
+            0,
+        );
+        const fromContractTransferCall = makeCallUnit(
+            erc721Contract.address, 
+            "safeTransferFrom", 
+            ['address', 'address', 'uint256'], 
+            [instaFiContract.address, await owner.getAddress(), 1],
+            0,
+        );
+        callUnits = [toContractTransferCall, fromContractTransferCall];
+
+        expect(await instaFiContract.executeExternal(callUnits, { value: 0}));
+    });
   
 });

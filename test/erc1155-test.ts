@@ -66,5 +66,51 @@ describe("ERC 1155 execution", () => {
         await expect(instaFiContract.connect(attacker).executeExternal(callUnits, { value: 0}))
             .to.be.revertedWith('TOKEN_SPEND_NOT_PERMITTED_FOR_SENDER')
     });
+    
+    it("Owner --> Contract: safeTransferFrom works", async () => {
+        const toContractTransferCall = makeCallUnit(
+            erc1155Contract.address, 
+            "safeTransferFrom", 
+            ['address', 'address', 'uint256', 'uint256', 'bytes'], 
+            [await owner.getAddress(), instaFiContract.address, 1, 1, 0],
+            0,
+        );
+        callUnits = [toContractTransferCall];
+
+        expect(await instaFiContract.executeExternal(callUnits, { value: 0}));
+    });
+    
+    it("Contract --> Owner: safeTransferFrom works", async () => {
+        const toContractTransferCall = makeCallUnit(
+            erc1155Contract.address, 
+            "safeTransferFrom", 
+            ['address', 'address', 'uint256', 'uint256', 'bytes'], 
+            [await owner.getAddress(), instaFiContract.address, 1, 1, 0],
+            0,
+        );
+        const fromContractTransferCall = makeCallUnit(
+            erc1155Contract.address, 
+            "safeTransferFrom", 
+            ['address', 'address', 'uint256', 'uint256', 'bytes'], 
+            [instaFiContract.address, await owner.getAddress(), 1, 1, 0],
+            0,
+        );
+        callUnits = [toContractTransferCall, fromContractTransferCall];
+
+        expect(await instaFiContract.executeExternal(callUnits, { value: 0}));
+    });
+    
+    it("Owner --> Contract: safeBatchTransferFrom works", async () => {
+        const toContractTransferCall = makeCallUnit(
+            erc1155Contract.address, 
+            "safeBatchTransferFrom", 
+            ['address', 'address', 'uint256[]', 'uint256[]', 'bytes'], 
+            [await owner.getAddress(), instaFiContract.address, [1], [1], 0],
+            0,
+        );
+        callUnits = [toContractTransferCall];
+
+        expect(await instaFiContract.executeExternal(callUnits, { value: 0}));
+    });
   
 });

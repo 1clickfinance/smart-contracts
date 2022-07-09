@@ -16,7 +16,8 @@ const config: HardhatUserConfig = {
         },
         eth_ropsten: {
             url: `https://speedy-nodes-nyc.moralis.io/${MORALIS_API_KEY}/eth/ropsten`,
-            accounts: [DEPLOYER_PRIVATE_KEY]
+            accounts: [DEPLOYER_PRIVATE_KEY],
+            gasPrice: 10000000000
         },
         eth_kovan: {
             url: `https://speedy-nodes-nyc.moralis.io/${MORALIS_API_KEY}/eth/kovan`,

@@ -54,3 +54,24 @@ export const getEnvVariable = (key: string): string => {
         throw new Error(`${key} not set in environment variables`)
     }
 }
+
+// Includes only part of the ERC20 token standard
+export const Erc20Abi = [
+    // Read-Only Functions
+    "function balanceOf(address owner) view returns (uint256)",
+    "function decimals() view returns (uint8)",
+    "function symbol() view returns (string)",
+
+    // Authenticated Functions
+    "function transfer(address to, uint256 amount) returns (bool)",
+    "function approve(address spender, uint256 amount) returns (bool)",
+
+    // Events
+    "event Transfer(address indexed from, address indexed to, uint amount)"
+];
+
+// Includes only part of the Aave Pool API
+export const AavePoolAbi = [
+    // Authenticated Functions
+    " function supply(address asset, uint256 amount, address onBehalfOf, uint16 referralCode)",
+];

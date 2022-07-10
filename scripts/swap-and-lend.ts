@@ -3,12 +3,13 @@ import { ethers } from "hardhat"
 import axios from "axios"
 
 async function main() {
-    const srcToken = "0xad6d458402f60fd3bd25163575031acdce07538d" // DAI
-    const dstToken = "0xc778417e063141139fce010982780140aa0cd5ab" // WETH
-    const srcAmount = "100000000000000000"
+    const srcToken = "0xA7D7079b0FEaD91F3e65f86E8915Cb59c1a4C664" // USDCE.e on Avax mainnet
+    const dstToken = "0xb31f66aa3c1e785363f0875a1b74e27b85fd66c7" // WAVAX on Avax mainnet
+
+    const srcAmount = "100000"
     const userAddress = "0xbAe00583E381821b8aec9B4aebB4E52864100baE"
 
-    const swapperAddress = getEnvVariable("ZEROX_WRAPPER_ADDRESS")
+    const zeroXAaveWrapperAddress = getEnvVariable("ZEROX_AAVE_WRAPPER_ADDRESS")
     
     const owner = (await ethers.getSigners())[0]
 
@@ -21,7 +22,7 @@ async function main() {
     })
    
     const orderResponse = await axios.get(
-        `https://ropsten.api.0x.org/swap/v1/quote`,
+        `https://avalanche.api.0x.org/swap/v1/quote`,
         {
             params: orderParams
         }
@@ -32,26 +33,26 @@ async function main() {
     const erc20Token = new ethers.Contract(srcToken, Erc20Abi, owner)
     const balance = await erc20Token.balanceOf(owner.address)
     const approval = await erc20Token.approve(
-        swapperAddress, 
+        zeroXAaveWrapperAddress, 
         balance,
     )
     console.log(`Approval is`, approval)
     await approval.wait()
     
     // 2. Do the swap & transfer using wrapper
-    const contract = await ethers.getContractFactory("ZeroXWrapper")
-    const swapContract = contract.attach(swapperAddress)
-    const swapResult = await swapContract.swapWithZeroExForUser(
-        dstToken,
+    const contract = await ethers.getContractFactory("AaveZeroXWrapper")
+    const zeroXAaveWrapper = contract.attach(zeroXAaveWrapperAddress)
+    const swapResult = await zeroXAaveWrapper.swapAndLend(
         srcToken,
-        userAddress,
         srcAmount,
         orderResponse.data.data,
+        dstToken,
+        userAddress,
         {
-            gasLimit: 400000,
+            gasLimit: 800000,
         }
     )
-    console.log("Swap result:", swapResult)
+    console.log("Swap and Lend result:", swapResult)
     await swapResult.wait()
 }
 

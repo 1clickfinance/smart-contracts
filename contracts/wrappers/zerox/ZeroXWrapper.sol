@@ -2,8 +2,9 @@
 pragma solidity ^0.8.0;
 
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import { IZeroXWrapper } from "./IZeroXWrapper.sol";
 
-contract SwapsWrapper {
+contract ZeroXWrapper is IZeroXWrapper {
     address public zeroXProxy;
     
     constructor(address _zeroXProxy) { 
@@ -16,22 +17,20 @@ contract SwapsWrapper {
      */
     function swapWithZeroExForContract(
         address sellTokenAddress,
-        address allowanceTarget,
         uint256 sellAmount,
         bytes calldata zeroExData
-    ) external {
-        _swapWithZeroEx(sellTokenAddress, allowanceTarget, sellAmount, zeroExData);
+    ) override external {
+        _swapWithZeroEx(sellTokenAddress, sellAmount, zeroExData);
     }
 
     function swapWithZeroExForUser(
         address buyTokenAddress,
         address sellTokenAddress,
-        address allowanceTarget,
         address onBehalfOf,
         uint256 sellAmount,
         bytes calldata zeroExData
-    ) external {
-        _swapWithZeroEx(sellTokenAddress, allowanceTarget, sellAmount, zeroExData);
+    ) override external {
+        _swapWithZeroEx(sellTokenAddress, sellAmount, zeroExData);
 
         // Transfer the swapped token to user
         IERC20 buyToken = IERC20(buyTokenAddress);
@@ -40,17 +39,16 @@ contract SwapsWrapper {
 
     function _swapWithZeroEx(
         address sellTokenAddress,
-        address allowanceTarget,
         uint256 sellAmount,
         bytes calldata zeroExData
-    ) private {
+    ) internal {
         IERC20 sellToken = IERC20(sellTokenAddress);
 
         // 1. Transfer the user's tokens to this contract
         sellToken.transferFrom(msg.sender, address(this), sellAmount);
 
         // 2. Set allowance to the ZeroX target
-        sellToken.approve(allowanceTarget, sellAmount);
+        sellToken.approve(zeroXProxy, sellAmount);
 
         // 3. Do the ZeroX swap
         (bool zeroXExecuted, ) = zeroXProxy.call(zeroExData);

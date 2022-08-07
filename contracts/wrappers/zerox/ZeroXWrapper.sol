@@ -20,7 +20,7 @@ contract ZeroXWrapper is IZeroXWrapper {
         uint256 sellAmount,
         bytes calldata zeroExData
     ) override external {
-        _swapWithZeroEx(sellTokenAddress, sellAmount, zeroExData);
+        _swapWithZeroExContract(sellTokenAddress, sellAmount, zeroExData);
     }
 
     function swapWithZeroExForUser(
@@ -30,14 +30,16 @@ contract ZeroXWrapper is IZeroXWrapper {
         uint256 sellAmount,
         bytes calldata zeroExData
     ) override external {
-        _swapWithZeroEx(sellTokenAddress, sellAmount, zeroExData);
-
-        // Transfer the swapped token to user
-        IERC20 buyToken = IERC20(buyTokenAddress);
-        buyToken.transfer(onBehalfOf, buyToken.balanceOf(address(this)));
+        _swapWithZeroExUser(
+            buyTokenAddress,
+            sellTokenAddress,
+            onBehalfOf,
+            sellAmount, 
+            zeroExData
+        );
     }
 
-    function _swapWithZeroEx(
+    function _swapWithZeroExContract(
         address sellTokenAddress,
         uint256 sellAmount,
         bytes calldata zeroExData
@@ -53,5 +55,19 @@ contract ZeroXWrapper is IZeroXWrapper {
         // 3. Do the ZeroX swap
         (bool zeroXExecuted, ) = zeroXProxy.call(zeroExData);
         require(zeroXExecuted, "ZeroX Swap failed");
+    }
+
+    function _swapWithZeroExUser(
+        address buyTokenAddress,
+        address sellTokenAddress,
+        address onBehalfOf,
+        uint256 sellAmount,
+        bytes calldata zeroExData
+    ) internal {
+        _swapWithZeroExContract(sellTokenAddress, sellAmount, zeroExData);
+
+        // Transfer the swapped token to user
+        IERC20 buyToken = IERC20(buyTokenAddress);
+        buyToken.transfer(onBehalfOf, buyToken.balanceOf(address(this)));
     }
 }

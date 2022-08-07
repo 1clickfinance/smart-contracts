@@ -1,4 +1,4 @@
-import { getEnvVariable, Erc20Abi } from "./commons"
+import { getEnvVariable, Erc20Interface } from "./commons"
 import { ethers } from "hardhat"
 import axios from "axios"
 
@@ -30,7 +30,7 @@ async function main() {
     console.log(orderResponse)
 
     // 1. Approve spending for the wrapper
-    const erc20Token = new ethers.Contract(srcToken, Erc20Abi, owner)
+    const erc20Token = new ethers.Contract(srcToken, Erc20Interface, owner)
     const balance = await erc20Token.balanceOf(owner.address)
     const approval = await erc20Token.approve(
         zeroXAaveWrapperAddress, 

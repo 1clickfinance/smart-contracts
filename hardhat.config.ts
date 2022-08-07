@@ -28,7 +28,7 @@ const config: HardhatUserConfig = {
             accounts: [DEPLOYER_PRIVATE_KEY]
         },
         avax_mainnet: {
-            url: `https://speedy-nodes-nyc.moralis.io/${MORALIS_API_KEY}/avalanche/mainnet`,
+            url: `https://api.avax.network/ext/bc/C/rpc`,
             accounts: [DEPLOYER_PRIVATE_KEY]
         }
     },

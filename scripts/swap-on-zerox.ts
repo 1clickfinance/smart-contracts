@@ -1,14 +1,14 @@
-import { getEnvVariable, Erc20Abi } from "./commons"
+import { getEnvVariable, Erc20Interface } from "./commons"
 import { ethers } from "hardhat"
 import axios from "axios"
 
 async function main() {
-    const srcToken = "0xad6d458402f60fd3bd25163575031acdce07538d" // DAI
-    const dstToken = "0xc778417e063141139fce010982780140aa0cd5ab" // WETH
-    const srcAmount = "100000000000000000"
+    const srcToken = "0xa7d7079b0fead91f3e65f86e8915cb59c1a4c664" // USDC.e
+    const dstToken = "0xd586e7f844cea2f87f50152665bcbc2c279d8d70" // DAI
+    const srcAmount = "100000"
     const userAddress = "0xbAe00583E381821b8aec9B4aebB4E52864100baE"
 
-    const swapperAddress = getEnvVariable("ZEROX_WRAPPER_ADDRESS")
+    const aaveSwapperAddress = getEnvVariable("ZEROX_AAVE_WRAPPER_ADDRESS")
     
     const owner = (await ethers.getSigners())[0]
 
@@ -21,7 +21,7 @@ async function main() {
     })
    
     const orderResponse = await axios.get(
-        `https://ropsten.api.0x.org/swap/v1/quote`,
+        `https://avalanche.api.0x.org/swap/v1/quote`,
         {
             params: orderParams
         }
@@ -29,19 +29,19 @@ async function main() {
     console.log(orderResponse)
 
     // 1. Approve spending for the wrapper
-    const erc20Token = new ethers.Contract(srcToken, Erc20Abi, owner)
+    const erc20Token = new ethers.Contract(srcToken, Erc20Interface, owner)
     const balance = await erc20Token.balanceOf(owner.address)
     const approval = await erc20Token.approve(
-        swapperAddress, 
+        aaveSwapperAddress, 
         balance,
     )
     console.log(`Approval is`, approval)
     await approval.wait()
     
     // 2. Do the swap & transfer using wrapper
-    const contract = await ethers.getContractFactory("ZeroXWrapper")
-    const swapContract = contract.attach(swapperAddress)
-    const swapResult = await swapContract.swapWithZeroExForUser(
+    const contract = await ethers.getContractFactory("AaveZeroXWrapper")
+    const aaveSwapContract = contract.attach(aaveSwapperAddress)
+    const swapResult = await aaveSwapContract.swap(
         dstToken,
         srcToken,
         userAddress,

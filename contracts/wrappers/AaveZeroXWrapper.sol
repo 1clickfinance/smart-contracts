@@ -12,6 +12,30 @@ contract AaveZeroXWrapper is AaveWrapper, ZeroXWrapper {
         address _aavePoolAddress
     ) ZeroXWrapper(_zeroXProxy) AaveWrapper(_aavePoolAddress) { }
 
+    function swap(
+        address buyTokenAddress,
+        address sellTokenAddress,
+        address onBehalfOf,
+        uint256 sellAmount,
+        bytes calldata zeroExData
+    ) external {
+        _swapWithZeroExUser(
+            buyTokenAddress, 
+            sellTokenAddress, 
+            onBehalfOf, 
+            sellAmount, 
+            zeroExData
+        );
+    }
+
+    function lend(
+        address supplyTokenAddress,
+        uint256 supplyAmount,
+        address onBehalfOf
+    ) external {
+        _supplyToAaveUser(supplyTokenAddress, supplyAmount, onBehalfOf);
+    }
+
     function swapAndLend(
         address sellTokenAddress,
         uint256 sellAmount,
@@ -20,7 +44,7 @@ contract AaveZeroXWrapper is AaveWrapper, ZeroXWrapper {
         address onBehalfOf
     ) external {
         // 1. Swap to the lending token
-        _swapWithZeroEx(
+        _swapWithZeroExContract(
             sellTokenAddress,
             sellAmount,
             zeroExData
@@ -28,7 +52,7 @@ contract AaveZeroXWrapper is AaveWrapper, ZeroXWrapper {
 
         // 2. Deposit the lend token to aave pool
         IERC20 lendToken = IERC20(lendTokenAddress);
-        _supplyToAave(
+        _supplyToAaveContract(
             lendTokenAddress, 
             lendToken.balanceOf(address(this)), 
             onBehalfOf

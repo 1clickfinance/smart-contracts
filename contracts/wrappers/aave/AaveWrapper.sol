@@ -17,15 +17,23 @@ contract AaveWrapper is IAaveWrapper {
         uint256 supplyAmount,
         address onBehalfOf
     ) override external {
+        _supplyToAaveUser(supplyTokenAddress, supplyAmount, onBehalfOf);
+    }
+
+    function _supplyToAaveUser(
+        address supplyTokenAddress,
+        uint256 supplyAmount,
+        address onBehalfOf
+    ) internal {
         // 1. Transfer the user's tokens to this contract
         IERC20 supplyToken = IERC20(supplyTokenAddress);
         supplyToken.transferFrom(msg.sender, address(this), supplyAmount);
 
         // 2. Supply to the pool
-        _supplyToAave(supplyTokenAddress, supplyAmount, onBehalfOf);
+        _supplyToAaveContract(supplyTokenAddress, supplyAmount, onBehalfOf);
     }
 
-    function _supplyToAave(
+    function _supplyToAaveContract(
         address supplyTokenAddress,
         uint256 supplyAmount,
         address onBehalfOf

@@ -1,4 +1,5 @@
 import "dotenv/config"
+import { Interface } from "ethers/lib/utils";
 import Web3 from "web3"
 
 const web3 = new Web3(Web3.givenProvider)
@@ -56,7 +57,7 @@ export const getEnvVariable = (key: string): string => {
 }
 
 // Includes only part of the ERC20 token standard
-export const Erc20Abi = [
+export const Erc20Interface = new Interface([
     // Read-Only Functions
     "function balanceOf(address owner) view returns (uint256)",
     "function decimals() view returns (uint8)",
@@ -68,7 +69,7 @@ export const Erc20Abi = [
 
     // Events
     "event Transfer(address indexed from, address indexed to, uint amount)"
-];
+]);
 
 // Includes only part of the Aave Pool API
 export const AavePoolAbi = [

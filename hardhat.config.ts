@@ -3,7 +3,7 @@ import "@nomiclabs/hardhat-waffle"
 import "hardhat-gas-reporter"
 import { HardhatUserConfig } from "hardhat/config"
 
-const MORALIS_API_KEY = getEnvVariable("MORALIS_API_KEY")
+const INFURA_API_KEY = getEnvVariable("INFURA_API_KEY")
 const CMC_API_KEY = getEnvVariable("CMC_API_KEY")
 const DEPLOYER_PRIVATE_KEY = getEnvVariable("DEPLOYER_PRIVATE_KEY")
 
@@ -15,20 +15,20 @@ const config: HardhatUserConfig = {
             gasPrice: 21000000000
         },
         eth_ropsten: {
-            url: `https://speedy-nodes-nyc.moralis.io/${MORALIS_API_KEY}/eth/ropsten`,
+            url: `https://ropsten.infura.io/v3/${INFURA_API_KEY}`,
             accounts: [DEPLOYER_PRIVATE_KEY],
             gasPrice: 10000000000
         },
         eth_kovan: {
-            url: `https://speedy-nodes-nyc.moralis.io/${MORALIS_API_KEY}/eth/kovan`,
+            url: `https://kovan.infura.io/v3/${INFURA_API_KEY}`,
             accounts: [DEPLOYER_PRIVATE_KEY]
         },
         eth_mainnet: {
-            url: `https://speedy-nodes-nyc.moralis.io/${MORALIS_API_KEY}/eth/mainnet`,
+            url: `https://mainnet.infura.io/v3/${INFURA_API_KEY}`,
             accounts: [DEPLOYER_PRIVATE_KEY]
         },
         avax_mainnet: {
-            url: `https://speedy-nodes-nyc.moralis.io/${MORALIS_API_KEY}/avalanche/mainnet`,
+            url: `https://avalanche-mainnet.infura.io/v3/${INFURA_API_KEY}`,
             accounts: [DEPLOYER_PRIVATE_KEY]
         }
     },

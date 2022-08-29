@@ -23,10 +23,13 @@ async function deployZeroXWrapper() {
 
 async function deployAaveZeroXWrapper() {
     const contract = await ethers.getContractFactory("AaveZeroXWrapper")
+
+    // AVAX mainnet deployment
+    // Ropsten - but only 0x is available
     const deployment = await contract.deploy(
         "0xDef1C0ded9bec7F1a1670819833240f027b25EfF", 
         "0x794a61358D6845594F94dc1DB02A252b5b4814aD"
-    ) 
+    )
     await deployment.deployed()
     console.log("ZeroX Wrapper deployed to:", deployment.address)
 }

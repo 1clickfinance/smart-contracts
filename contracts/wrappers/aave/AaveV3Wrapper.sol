@@ -76,4 +76,17 @@ contract AaveV3Wrapper is IAaveWrapper {
 
         return amountWithdrawn;
     }
+
+    function borrowFromAave(address _tokenAddress, uint256 _amount) external {
+        address asset = _tokenAddress;
+        uint256 amount = _amount;
+
+        // 1. Smart contract borrows tokens at a stable rate
+        //    on behalf of msg sender
+        POOL.borrow(asset, amount, 1, 0, msg.sender);
+
+        // 2. Transfer the borrowed asset to the user.
+        IERC20 token = IERC20(asset);
+        token.transfer(msg.sender, amount);
+    }
 }

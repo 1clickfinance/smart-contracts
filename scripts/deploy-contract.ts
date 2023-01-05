@@ -19,8 +19,8 @@ async function deployAaveWrapper() {
 async function deployAaveV3Wrapper() {
   const contract = await ethers.getContractFactory("AaveV3Wrapper");
   const deployment = await contract.deploy(
-    // "0xc4dCB5126a3AfEd129BC3668Ea19285A9f56D15D" // goerli address provider
-    "0xa97684ead0e402dC232d5A977953DF7ECBaB3CDb"
+    "0xc4dCB5126a3AfEd129BC3668Ea19285A9f56D15D" // goerli address provider
+    // "0xa97684ead0e402dC232d5A977953DF7ECBaB3CDb" // avalanche address provider
   );
   await deployment.deployed();
   console.log("Aave Wrapper deployed to:", deployment.address);

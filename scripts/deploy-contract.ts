@@ -26,6 +26,12 @@ async function deployAaveV3Wrapper() {
   console.log("Aave Wrapper deployed to:", deployment.address);
 }
 
+async function deployOneClickRouter() {
+  const contract = await ethers.getContractFactory("OneClickRouter");
+  const deployment = await contract.deploy();
+  await deployment.deployed();
+  console.log("OneClickRouter deployed to:", deployment.address);
+}
 async function deployZeroXWrapper() {
   const contract = await ethers.getContractFactory("ZeroXWrapper");
   const deployment = await contract.deploy(
@@ -52,7 +58,8 @@ async function main() {
   // await deployZeroXWrapper()
   // await deployAaveWrapper()
   // await deployAaveZeroXWrapper();
-  await deployAaveV3Wrapper();
+  // await deployAaveV3Wrapper();
+  await deployOneClickRouter();
 }
 
 main()

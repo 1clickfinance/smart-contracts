@@ -2,17 +2,18 @@
 pragma solidity 0.8.10;
 
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract OneClickRouter {
     using SafeERC20 for IERC20;
     event OrderExecuted(
         address asset,
         uint256 amount,
-        address protocolContractAddress,
-        address protocolTokenAddress
+        address protocolContractAddress
     );
 
     event Received(address, uint);
+    event Balance(uint256);
 
     mapping(address => uint) public balanceReceived;
 
@@ -35,27 +36,34 @@ contract OneClickRouter {
         address asset,
         uint256 amount,
         address protocolContractAddress,
-        address protocolTokenAddress,
+        address[] memory inputTokens,
+        address[] memory outputTokens,
         bytes calldata txData
     ) external {
-        // Pull money from msg.sender
-        _pullTokens(msg.sender, address(this), amount);
-
-        // Allow protocolAddress for pulling amount from this contract
-        uint256 balance;
-        uint256 value;
-        if (asset == address(0)) {
-            value = balanceReceived[msg.sender];
-            require(
-                value >= amount,
-                "User's native token balance in contract is not enough"
-            );
-            value = amount;
-        } else {
-            value = 0;
-            balance = IERC20(asset).balanceOf(address(this));
-            require(balance > 0, "Not enough balance for the step");
-            _approveTokenIfNeeded(asset, protocolContractAddress, balance);
+        uint256 value = 0;
+        for (uint i = 0; i < inputTokens.length; i++) {
+            address inputToken = inputTokens[i];
+            // Pull money from msg.sender
+            _pullTokens(msg.sender, inputToken, amount);
+            // Allow protocolAddress for pulling amount from this contract
+            uint256 balance;
+            if (inputToken == address(0)) {
+                value = balanceReceived[msg.sender];
+                require(
+                    value >= amount,
+                    "User's native token balance in contract is not enough"
+                );
+                value = amount;
+            } else {
+                value = 0;
+                balance = IERC20(inputToken).balanceOf(address(this));
+                require(balance > 0, "Not enough balance for the step");
+                _approveTokenIfNeeded(
+                    inputToken,
+                    protocolContractAddress,
+                    balance
+                );
+            }
         }
 
         // Call txData on protocolAddress
@@ -72,21 +80,15 @@ contract OneClickRouter {
             revert(abi.decode(result, (string)));
         }
 
-        // Transfer protocolTokenAddress to msg.sender from this contract
-        uint256 protocolTokenBalance = IERC20(protocolTokenAddress).balanceOf(
-            address(this)
-        );
-        IERC20(protocolTokenAddress).safeTransfer(
-            msg.sender,
-            protocolTokenBalance
-        );
+        for (uint i = 0; i < outputTokens.length; i++) {
+            address outputToken = outputTokens[i];
+            uint256 outputTokenBalance = IERC20(outputToken).balanceOf(
+                address(this)
+            );
+            IERC20(outputToken).safeTransfer(msg.sender, outputTokenBalance);
+        }
 
-        emit OrderExecuted(
-            asset,
-            amount,
-            protocolContractAddress,
-            protocolTokenAddress
-        );
+        emit OrderExecuted(asset, amount, protocolContractAddress);
     }
 
     receive() external payable {

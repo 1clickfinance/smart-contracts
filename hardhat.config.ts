@@ -7,6 +7,7 @@ import { getEnvVariable } from "./scripts/commons";
 const INFURA_API_KEY = getEnvVariable("INFURA_API_KEY");
 const CMC_API_KEY = getEnvVariable("CMC_API_KEY");
 const DEPLOYER_PRIVATE_KEY = getEnvVariable("DEPLOYER_PRIVATE_KEY");
+const MNEMONIC = getEnvVariable("MNEMONIC");
 
 const config: HardhatUserConfig = {
   defaultNetwork: "hardhat",
@@ -36,6 +37,12 @@ const config: HardhatUserConfig = {
     eth_goerli: {
       url: `https://goerli.infura.io/v3/${INFURA_API_KEY}`,
       accounts: [DEPLOYER_PRIVATE_KEY],
+    },
+    bsc_testnet: {
+      url: "https://data-seed-prebsc-1-s3.binance.org:8545",
+      chainId: 97,
+      gasPrice: 20000000000,
+      accounts: { mnemonic: MNEMONIC },
     },
   },
   gasReporter: {

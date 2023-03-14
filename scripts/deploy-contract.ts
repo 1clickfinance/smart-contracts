@@ -19,13 +19,28 @@ async function deployAaveWrapper() {
 async function deployAaveV3Wrapper() {
   const contract = await ethers.getContractFactory("AaveV3Wrapper");
   const deployment = await contract.deploy(
-    "0xc4dCB5126a3AfEd129BC3668Ea19285A9f56D15D" // goerli address provider
+    "0xC911B590248d127aD18546B186cC6B324e99F02c" // goerli address provider
     // "0xa97684ead0e402dC232d5A977953DF7ECBaB3CDb" // avalanche address provider
   );
   await deployment.deployed();
   console.log("Aave Wrapper deployed to:", deployment.address);
 }
 
+async function deployOneClickRouter() {
+  const contract = await ethers.getContractFactory("OneClickRouter");
+  const deployment = await contract.deploy();
+  await deployment.deployed();
+  console.log("OneClickRouter deployed to:", deployment.address);
+}
+
+async function deployFlashLoan() {
+  const contract = await ethers.getContractFactory("FlashLoan");
+  const deployment = await contract.deploy(
+    "0xC911B590248d127aD18546B186cC6B324e99F02c"
+  ); // Goerli PoolAddressProvider
+  await deployment.deployed();
+  console.log("FlashLoan contract deployed to:", deployment.address);
+}
 async function deployZeroXWrapper() {
   const contract = await ethers.getContractFactory("ZeroXWrapper");
   const deployment = await contract.deploy(
@@ -52,7 +67,9 @@ async function main() {
   // await deployZeroXWrapper()
   // await deployAaveWrapper()
   // await deployAaveZeroXWrapper();
-  await deployAaveV3Wrapper();
+  // await deployAaveV3Wrapper();
+  // await deployOneClickRouter();
+  await deployFlashLoan();
 }
 
 main()

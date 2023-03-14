@@ -32,6 +32,15 @@ async function deployOneClickRouter() {
   await deployment.deployed();
   console.log("OneClickRouter deployed to:", deployment.address);
 }
+
+async function deployFlashLoan() {
+  const contract = await ethers.getContractFactory("FlashLoan");
+  const deployment = await contract.deploy(
+    "0xC911B590248d127aD18546B186cC6B324e99F02c"
+  ); // Goerli PoolAddressProvider
+  await deployment.deployed();
+  console.log("FlashLoan contract deployed to:", deployment.address);
+}
 async function deployZeroXWrapper() {
   const contract = await ethers.getContractFactory("ZeroXWrapper");
   const deployment = await contract.deploy(
@@ -59,7 +68,8 @@ async function main() {
   // await deployAaveWrapper()
   // await deployAaveZeroXWrapper();
   // await deployAaveV3Wrapper();
-  await deployOneClickRouter();
+  // await deployOneClickRouter();
+  await deployFlashLoan();
 }
 
 main()
